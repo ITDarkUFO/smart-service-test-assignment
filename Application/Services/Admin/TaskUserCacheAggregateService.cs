@@ -16,7 +16,7 @@ namespace Application.Services.Admin
                 .Any(ut => ut.TaskListCategoryID == _districtAvailable))
                 return new NotFoundResult();
 
-            var taskCatJointaskUser = await _context.UserTasksListCategories
+            var taskCatJoinTaskUser = await _context.UserTasksListCategories
                 .SelectMany(tlc => _context.TaskResponsibleUsers
                     .Select(tu => new
                     {
@@ -29,10 +29,29 @@ namespace Application.Services.Admin
                 .Where(ud => ud.TenantID == tenantID && ud.Deleted == null)
                 .ToListAsync();
 
-            taskCatJointaskUser
-                .Where(tctu => tctu.TaskListCategoryID == _districtAvailable);
+            var userDistrict2 = await _context.UserDistricts
+                .Where(ud => ud.Deleted == null).ToListAsync();
 
-            return null;
+            var taskUserCacheRaw = taskCatJoinTaskUser
+                .Where(tctu => tctu.TaskListCategoryID == _districtAvailable &&
+                    userDistrict1.Where(
+                        ud => tctu.UserID == ud.UserID &&
+                        userDistrict2.Where(
+                            ud1 => ud1.TenantID == ud.TenantID &&
+                            ud1.DistrictID == ud.DistrictID &&
+                            ud1.UserID == tctu.UserID)
+                        .Any())
+                    .Any());
+
+            var taskUserCache = taskUserCacheRaw
+                .Select(tuc => new TaskUserCache()
+                {
+                    TaskID = tuc.TaskID,
+                    UserID = tuc.UserID,
+                    TaskListCategoryID = tuc.TaskListCategoryID
+                }).ToList();
+
+            return new OkObjectResult(taskUserCache);
         }
     }
 }

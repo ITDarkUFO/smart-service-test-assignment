@@ -72,9 +72,9 @@ begin
             from
                 ADM.UserDistrict ud
             where
-                ud.TenantID = @pTenantID --
-                and ud.UserID = tlc.UserID --
-                and ud.Deleted is null --
+                ud.TenantID = @pTenantID
+                and ud.UserID = tlc.UserID 
+                and ud.Deleted is null
                 and exists (
                     select
                         1

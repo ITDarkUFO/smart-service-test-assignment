@@ -42,7 +42,10 @@ namespace Application.Models
         public DbSet<UserDistrict> UserDistricts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Default"));
+        {
+            optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Default"));
+            optionsBuilder.EnableSensitiveDataLogging();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

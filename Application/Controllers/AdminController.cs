@@ -7,14 +7,9 @@ namespace Application.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AdminController : Controller
+    public class AdminController(ApplicationDbContext context) : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public AdminController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ApplicationDbContext _context = context;
 
         [HttpGet]
         public IActionResult Index()
@@ -23,17 +18,31 @@ namespace Application.Controllers
         }
 
         [HttpGet("UserListCategoryGet")]
-        public async Task<IActionResult> UserListCategoryGet([FromQuery(Name = "id")] short? tenantId)
+        public async Task<IActionResult> UserListCategoryGet([FromQuery] short? tenantId)
         {
             if (!tenantId.HasValue)
             {
                 return BadRequest("ID не может быть пустым");
             }
 
-            var userCategories = await new UserListCategoryService(_context).UserListCategoryGet(tenantId.Value);
+            var userCategories = await new UserListCategoryService(_context)
+                .UserListCategoryGet(tenantId.Value);
 
             return View(userCategories);
         }
 
+        [HttpGet("TaskUserCacheAggregate")]
+        public async Task<IActionResult> TaskUserCacheAggregate([FromQuery] short? tenantId)
+        {
+            if (!tenantId.HasValue)
+            {
+                return BadRequest("ID не может быть пустым");
+            }
+
+            var resultWithList = await new TaskUserCacheAggregateService(_context)
+                .TaskUserCacheAggregate(tenantId.Value);
+
+            return View(resultWithList);
+        }
     }
 }

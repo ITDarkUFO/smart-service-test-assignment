@@ -1,5 +1,6 @@
 ﻿namespace Application.Models
 {
+    //TODO: Удалить
     public class TaskUserCache
     {
         public int TaskID { get; set; }

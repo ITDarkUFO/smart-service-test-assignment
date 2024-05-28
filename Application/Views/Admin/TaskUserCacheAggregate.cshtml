@@ -1,0 +1,27 @@
+﻿@if (Model.Value.Count == 0)
+{
+    <p>Ничего не найдено</p>
+}
+else
+{
+    <table class="table table-striped caption-top">
+        <caption>TaskUserCacheAggregate Results</caption>
+        <thead>
+            <tr>
+                <th>UserId</th>
+                <th>TaskId</th>
+                <th>TaskListCategoryId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (TaskUserCache item in Model.Value)
+            {
+                <tr>
+                    <td>@item.UserID</td>
+                    <td>@item.TaskID</td>
+                    <td>@item.TaskListCategoryID</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
