@@ -3,6 +3,7 @@ using System;
 using Application.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240527115128_Add TaskUserListCategory tables")]
+    partial class AddTaskUserListCategorytables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,8 +110,7 @@ namespace Application.Migrations
                     b.Property<int>("AssignedTo")
                         .HasColumnType("integer");
 
-                    b.HasKey("TenantID", "TaskID")
-                        .HasName("taskonlineassigned_pkey");
+                    b.HasKey("TenantID", "TaskID");
 
                     b.ToTable("TaskOnlineAssigneds");
                 });
@@ -164,33 +166,13 @@ namespace Application.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Application.Models.UserDistrict", b =>
-                {
-                    b.Property<int>("DistrictID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("TenantID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("DistrictID", "UserID")
-                        .HasName("userdistrict_pkey");
-
-                    b.ToTable("userdistrict", "adm");
-                });
-
             modelBuilder.Entity("Application.Models.UserRole", b =>
                 {
                     b.Property<short>("TenantID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("smallint");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("TenantID"));
 
                     b.Property<bool?>("Deleted")
                         .HasColumnType("boolean");
@@ -198,7 +180,10 @@ namespace Application.Migrations
                     b.Property<int>("RoleID")
                         .HasColumnType("integer");
 
-                    b.HasKey("TenantID", "UserID")
+                    b.Property<int>("UserID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TenantID")
                         .HasName("userrole_pkey");
 
                     b.ToTable("userrole", "adm");

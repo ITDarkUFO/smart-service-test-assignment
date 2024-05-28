@@ -3,6 +3,7 @@ using System;
 using Application.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240527130814_Edit User Role pkey")]
+    partial class EditUserRolepkey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,26 +165,6 @@ namespace Application.Migrations
                         .HasName("user_pkey");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Application.Models.UserDistrict", b =>
-                {
-                    b.Property<int>("DistrictID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("integer");
-
-                    b.Property<bool?>("Deleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("TenantID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("DistrictID", "UserID")
-                        .HasName("userdistrict_pkey");
-
-                    b.ToTable("userdistrict", "adm");
                 });
 
             modelBuilder.Entity("Application.Models.UserRole", b =>
