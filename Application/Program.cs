@@ -10,8 +10,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<ApplicationDbContext>();
 
 builder.Services.AddTransient<UserListCategoryService>();
-builder.Services.AddTransient<TaskUserCacheAggregateService>();
+builder.Services.AddTransient<AdminTaskUserCacheAggregateService>();
 builder.Services.AddTransient<TaskUserCacheAggregateResponsibilityService>();
+builder.Services.AddTransient<WorkTaskUserCacheAggregateService>();
 
 var app = builder.Build();
 

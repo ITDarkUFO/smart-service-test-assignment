@@ -22,13 +22,20 @@ set
 set
     cursor_close_on_commit off
 set
-    transaction isolation level read uncommitted begin declare @IsOwnerOnly bit = 0,
-    @AssignedTo tinyint = 2,
-    @DistrictAvailable tinyint = 13,
-    @UserWorkType tinyint = 16,
-    @AllTaskAvailable tinyint = 19,
-    @CreatedBy tinyint = 20,
-    @Now datetime2(0) = getutcdate() if(1 = 2) begin create table #Task
+    transaction isolation level read uncommitted 
+    
+    --begin declare 
+    
+    --@IsOwnerOnly bit = 0,
+    --@AssignedTo tinyint = 2,
+    --@DistrictAvailable tinyint = 13,
+    --@UserWorkType tinyint = 16,
+    --@AllTaskAvailable tinyint = 19,
+    --@CreatedBy tinyint = 20,
+    --@Now datetime2(0) = getutcdate() 
+    
+    
+    if(1 = 2) begin create table #Task
     (
         ID int,
         AssetID int,

@@ -32,18 +32,19 @@ namespace Application.Controllers
             return View();
         }
 
-        [HttpGet("TaskUserCacheAggregate")]
-        public async Task<IActionResult> TaskUserCacheAggregate([FromQuery] short? tenantId)
+        [HttpGet("AdminTaskUserCacheAggregate")]
+        public async Task<IActionResult> AdminTaskUserCacheAggregate([FromQuery] short? tenantId)
         {
             if (!tenantId.HasValue)
                 return BadRequest("ID не может быть пустым");
 
-            //var resultWithList = await new TaskUserCacheAggregateService(_context)
-            //    .TaskUserCacheAggregate(tenantId.Value);
+            //var resultWithList = await new AdminTaskUserCacheAggregateService(_context)
+            //    .AdminTaskUserCacheAggregate(tenantId.Value);
 
             return View();
         }
 
+        [HttpGet("TaskUserCacheAggregateResponsibility")]
         public async Task<IActionResult> TaskUserCacheAggregateResponsibility([FromQuery] short? tenantId)
         {
             if (!tenantId.HasValue)
@@ -55,6 +56,17 @@ namespace Application.Controllers
             return View();
         }
 
+        [HttpGet("WorkTaskUserCacheAggregate")]
+        public async Task<IActionResult> WorkTaskUserCacheAggregate([FromQuery] short? tenantId)
+        {
+            if (!tenantId.HasValue)
+                return BadRequest("ID не может быть пустым");
+
+            await new WorkTaskUserCacheAggregateService(_context)
+                .TaskUserCacheAggregate(tenantId.Value);
+
+            return View();
+        }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
     }

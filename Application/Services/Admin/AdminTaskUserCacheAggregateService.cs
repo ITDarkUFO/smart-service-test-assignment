@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Admin
 {
-    public class TaskUserCacheAggregateService(ApplicationDbContext context)
+    public class AdminTaskUserCacheAggregateService(ApplicationDbContext context)
     {
         private readonly byte _districtAvailable = 13;
 
