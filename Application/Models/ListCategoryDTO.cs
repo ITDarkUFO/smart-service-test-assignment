@@ -1,6 +1,6 @@
 ﻿namespace Application.Models
 {
-    public class ListCategory
+    public class ListCategoryDTO
     {
         public byte ID { get; set; }
 

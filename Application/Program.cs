@@ -1,5 +1,6 @@
 using Application.Models;
 using Application.Services.Admin;
+using Application.Services.Work;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,8 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddTransient<ApplicationDbContext>();
+
 builder.Services.AddTransient<UserListCategoryService>();
 builder.Services.AddTransient<TaskUserCacheAggregateService>();
+builder.Services.AddTransient<TaskUserCacheAggregateResponsibilityService>();
 
 var app = builder.Build();
 

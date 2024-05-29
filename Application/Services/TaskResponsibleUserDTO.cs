@@ -1,6 +1,6 @@
-﻿namespace Application.Models
+﻿namespace Application.Services
 {
-    public class TaskResponsibleUser
+    public class TaskResponsibleUserDTO
     {
         public int TaskID { get; set; }
 

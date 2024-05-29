@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240527134529_Add userdistrict model")]
-    partial class Adduserdistrictmodel
+    [Migration("20240529142005_Set TaskOnlineAssigned.AssignedTo to nullable int")]
+    partial class SetTaskOnlineAssignedAssignedTotonullableint
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -107,7 +107,7 @@ namespace Application.Migrations
                     b.Property<int>("TaskID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AssignedTo")
+                    b.Property<int?>("AssignedTo")
                         .HasColumnType("integer");
 
                     b.HasKey("TenantID", "TaskID")

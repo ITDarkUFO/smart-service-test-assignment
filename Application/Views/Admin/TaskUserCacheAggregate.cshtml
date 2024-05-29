@@ -1,4 +1,5 @@
-﻿@if (Model.Value.Count == 0)
+﻿@using Application.Services
+@if (Model.Value.Count == 0)
 {
     <p>Ничего не найдено</p>
 }
@@ -14,7 +15,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (TaskUserCache item in Model.Value)
+            @foreach (TaskUserCacheDTO item in Model.Value)
             {
                 <tr>
                     <td>@item.UserID</td>

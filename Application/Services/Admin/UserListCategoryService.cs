@@ -8,15 +8,14 @@ namespace Application.Services.Admin
     {
         private readonly ApplicationDbContext _context = context;
 
-        public async Task<List<UserCategoryDTO>> UserListCategoryGet(short tenantID)
+        //INFO: Неясно откуда поступают Users, тк таблица #User временная
+        public async Task<List<UserCategoryDTO>> UserListCategoryGet
+            (short tenantID, List<ListCategoryDTO> listCategories)
         {
-            //Вероятно должны передаваться в параметрах функции
-            //TODO: Вынести users и listCategory в отдельную функцию
             var users = await _context.Users.ToListAsync();
-            var listCategory = await _context.ListCategories.ToListAsync();
 
             var usersJoinCategories = users
-                .SelectMany(u => listCategory
+                .SelectMany(u => listCategories
                     .Select(lc => new { User = u, ListCategory = lc }));
 
             var rolePermissionExtWithTenant = await _context.RolePermissionExts
@@ -38,7 +37,11 @@ namespace Application.Services.Admin
                 .Where(o => o.ListCategory.Permissionextid == null).ToList();
 
             return usersWithTenant.Concat(usersWithNoPermissions)
-                .Select(o => new UserCategoryDTO { UserID = o.User.ID, ListCategoryID = o.ListCategory.ID })
+                .Select(o => new UserCategoryDTO
+                {
+                    UserID = o.User.ID,
+                    ListCategoryID = o.ListCategory.ID
+                })
                 .ToList();
         }
     }

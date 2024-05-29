@@ -77,7 +77,7 @@ namespace Application.Migrations
                     b.ToTable("TaskOnlineAssigneds");
                 });
 
-            modelBuilder.Entity("Application.Models.TaskResponsibleUser", b =>
+            modelBuilder.Entity("Application.Models.TaskResponsibleUserDTO", b =>
                 {
                     b.Property<int>("TaskID")
                         .ValueGeneratedOnAdd()
@@ -94,7 +94,7 @@ namespace Application.Migrations
                     b.ToTable("TaskResponsibleUsers");
                 });
 
-            modelBuilder.Entity("Application.Models.TaskUserCache", b =>
+            modelBuilder.Entity("Application.Models.TaskUserCacheDTO", b =>
                 {
                     b.Property<int>("TaskID")
                         .ValueGeneratedOnAdd()
@@ -111,7 +111,7 @@ namespace Application.Migrations
                     b.HasKey("TaskID")
                         .HasName("taskusercache_pkey");
 
-                    b.ToTable("TaskUserCache");
+                    b.ToTable("TaskUserCacheDTO");
                 });
 
             modelBuilder.Entity("Application.Models.User", b =>
@@ -128,7 +128,7 @@ namespace Application.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Application.Models.UserTaskListCategory", b =>
+            modelBuilder.Entity("Application.Models.UserTaskListCategoryDTO", b =>
                 {
                     b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()

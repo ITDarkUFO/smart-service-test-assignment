@@ -92,8 +92,8 @@ if exists (
     select
         1
     from
-        #UserTaskListCategory where TaskListCategoryID in (@DistrictAvailable)
-) begin
+        #UserTaskListCategory where TaskListCategoryID in (@DistrictAvailable))
+begin
 insert into
     #TaskResponsibleUser(TaskID, UserID)
 select
@@ -121,7 +121,8 @@ from
             TaskID = ta.TaskID,
             UserID = ta.AssignedTo
         from
-            #TaskAssigned ta) tu;
+            #TaskAssigned ta
+    ) tu;
     end;
 
 end

@@ -6,6 +6,6 @@
         
         public int TaskID { get; set; }
 
-        public int AssignedTo { get; set; }
+        public int? AssignedTo { get; set; }
     }
 }

@@ -65,7 +65,7 @@ namespace Application.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TaskUserCache",
+                name: "TaskUserCacheDTO",
                 columns: table => new
                 {
                     TaskID = table.Column<int>(type: "integer", nullable: false)
@@ -120,7 +120,7 @@ namespace Application.Migrations
                 name: "Tasks");
 
             migrationBuilder.DropTable(
-                name: "TaskUserCache");
+                name: "TaskUserCacheDTO");
 
             migrationBuilder.DropTable(
                 name: "Users");

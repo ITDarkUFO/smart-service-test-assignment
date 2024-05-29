@@ -10,20 +10,23 @@ namespace Application.Services.Admin
 
         private readonly ApplicationDbContext _context = context;
 
-        public async Task<IActionResult> TaskUserCacheAggregate(short tenantID)
+        public async Task<List<TaskUserCacheDTO>> TaskUserCacheAggregate
+            (short tenantID,
+            List<UserTaskListCategoryDTO> userTaskListCategories,
+            List<TaskResponsibleUserDTO> taskResponsibleUsers)
         {
-            if (!_context.UserTasksListCategories
+            if (!userTaskListCategories
                 .Any(ut => ut.TaskListCategoryID == _districtAvailable))
-                return new NotFoundResult();
+                return [];
 
-            var taskCatJoinTaskUser = await _context.UserTasksListCategories
-                .SelectMany(tlc => _context.TaskResponsibleUsers
+            var taskCatJoinTaskUser = userTaskListCategories
+                .SelectMany(tlc => taskResponsibleUsers
                     .Select(tu => new
                     {
                         tu.TaskID,
                         tlc.UserID,
                         tlc.TaskListCategoryID
-                    })).ToListAsync();
+                    })).ToList();
 
             var userDistrict1 = await _context.UserDistricts
                 .Where(ud => ud.TenantID == tenantID && ud.Deleted == null)
@@ -44,14 +47,14 @@ namespace Application.Services.Admin
                     .Any());
 
             var taskUserCache = taskUserCacheRaw
-                .Select(tuc => new TaskUserCache()
+                .Select(tuc => new TaskUserCacheDTO()
                 {
                     TaskID = tuc.TaskID,
                     UserID = tuc.UserID,
                     TaskListCategoryID = tuc.TaskListCategoryID
                 }).ToList();
 
-            return new OkObjectResult(taskUserCache);
+            return taskUserCache;
         }
     }
 }

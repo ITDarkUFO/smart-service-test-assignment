@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240527134529_Add userdistrict model")]
-    partial class Adduserdistrictmodel
+    [Migration("20240529142610_Move TaskAssigned to DTO")]
+    partial class MoveTaskAssignedtoDTO
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,23 +82,6 @@ namespace Application.Migrations
                     b.ToTable("Tasks");
                 });
 
-            modelBuilder.Entity("Application.Models.TaskAssigned", b =>
-                {
-                    b.Property<int>("TaskID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TaskID"));
-
-                    b.Property<int>("AssignedTo")
-                        .HasColumnType("integer");
-
-                    b.HasKey("TaskID")
-                        .HasName("taskassigned_pkey");
-
-                    b.ToTable("TaskAssigneds");
-                });
-
             modelBuilder.Entity("Application.Models.TaskOnlineAssigned", b =>
                 {
                     b.Property<int>("TenantID")
@@ -107,7 +90,7 @@ namespace Application.Migrations
                     b.Property<int>("TaskID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AssignedTo")
+                    b.Property<int?>("AssignedTo")
                         .HasColumnType("integer");
 
                     b.HasKey("TenantID", "TaskID")

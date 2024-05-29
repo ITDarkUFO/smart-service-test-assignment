@@ -1,6 +1,7 @@
 ﻿using Application.Models;
 using Application.Services;
 using Application.Services.Admin;
+using Application.Services.Work;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Controllers
@@ -17,32 +18,44 @@ namespace Application.Controllers
             return View();
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
         [HttpGet("UserListCategoryGet")]
         public async Task<IActionResult> UserListCategoryGet([FromQuery] short? tenantId)
         {
             if (!tenantId.HasValue)
-            {
                 return BadRequest("ID не может быть пустым");
-            }
 
-            var userCategories = await new UserListCategoryService(_context)
-                .UserListCategoryGet(tenantId.Value);
+            //var userCategories = await new UserListCategoryService(_context)
+            //    .UserListCategoryGet(tenantId.Value);
 
-            return View(userCategories);
+            return View();
         }
 
         [HttpGet("TaskUserCacheAggregate")]
         public async Task<IActionResult> TaskUserCacheAggregate([FromQuery] short? tenantId)
         {
             if (!tenantId.HasValue)
-            {
                 return BadRequest("ID не может быть пустым");
-            }
 
-            var resultWithList = await new TaskUserCacheAggregateService(_context)
-                .TaskUserCacheAggregate(tenantId.Value);
+            //var resultWithList = await new TaskUserCacheAggregateService(_context)
+            //    .TaskUserCacheAggregate(tenantId.Value);
 
-            return View(resultWithList);
+            return View();
         }
+
+        public async Task<IActionResult> TaskUserCacheAggregateResponsibility([FromQuery] short? tenantId)
+        {
+            if (!tenantId.HasValue)
+                return BadRequest("ID не может быть пустым");
+
+            //var results = await new TaskUserCacheAggregateResponsibilityService(_context)
+            //    .TaskUserCacheAggregateResponsibility(tenantId.Value);
+
+            return View();
+        }
+
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
     }
 }
