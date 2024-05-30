@@ -1,92 +1,72 @@
-﻿CREATE PROCEDURE [ADM].[TaskUserCacheAggregate] @pTenantID smallint as
-set
-    nocount on
-set
-    xact_abort on
-set
-    ansi_nulls on
-set
-    ansi_warnings on
-set
-    ansi_padding on
-set
-    ansi_null_dflt_on on
-set
-    arithabort on
-set
-    quoted_identifier on
-set
-    concat_null_yields_null on
-set
-    implicit_transactions off
-set
-    cursor_close_on_commit off
-set
-    transaction isolation level read uncommitted 
-    begin declare @DistrictAvailable tinyint = 13;
+﻿CREATE PROCEDURE [ADM].[Taskusercacheaggregate] @pTenantID SMALLINT
+AS
+    SET nocount ON
+    SET xact_abort ON
+    SET ansi_nulls ON
+    SET ansi_warnings ON
+    SET ansi_padding ON
+    SET ansi_null_dflt_on ON
+    SET arithabort ON
+    SET quoted_identifier ON
+    SET concat_null_yields_null ON
+    SET implicit_transactions OFF
+    SET cursor_close_on_commit OFF
+    SET TRANSACTION isolation level READ uncommitted
 
-if(1 = 2) begin 
-    create table #TaskResponsibleUser 
-    (
-        TaskID int, 
-        UserID int
-    );
+  BEGIN
+      DECLARE @DistrictAvailable TINYINT = 13;
 
-    create table #UserTaskListCategory
-    (
-        UserID int,
-        TaskListCategoryID tinyint
-    );
+      IF( 1 = 2 )
+        BEGIN
+            CREATE TABLE #taskresponsibleuser
+              (
+                 taskid INT,
+                 userid INT
+              );
 
-    create table #TaskUserCache
-    (
-        TaskID int,
-        UserID int,
-        TaskListCategoryID tinyint
-    );
+            CREATE TABLE #usertasklistcategory
+              (
+                 userid             INT,
+                 tasklistcategoryid TINYINT
+              );
 
-end;
+            CREATE TABLE #taskusercache
+              (
+                 taskid             INT,
+                 userid             INT,
+                 tasklistcategoryid TINYINT
+              );
+        END;
 
-if exists (
-    select
-        1
-    from
-        #UserTaskListCategory where TaskListCategoryID = @DistrictAvailable
-    )
-    
-begin
-    insert into
-        #TaskUserCache(TaskID, UserID, TaskListCategoryID)
-    select
-        tu.TaskID,
-        tlc.UserID,
-        tlc.TaskListCategoryID
-    from
-        #UserTaskListCategory tlc
-        cross join #TaskResponsibleUser tu
-    where
-        tlc.TaskListCategoryID = @DistrictAvailable
-        and exists (
-            select
-                1
-            from
-                ADM.UserDistrict ud
-            where
-                ud.TenantID = @pTenantID
-                and ud.UserID = tlc.UserID 
-                and ud.Deleted is null
-                and exists (
-                    select
-                        1
-                    from
-                        ADM.UserDistrict ud1
-                    where
-                        ud1.TenantID = ud.TenantID
-                        and ud1.DistrictID = ud.DistrictID
-                        and ud1.UserID = tu.UserID
-                        and ud1.Deleted is null
-                )
-        );
-end;
-
-end
+      IF EXISTS (SELECT 1
+                 FROM   #usertasklistcategory
+                 WHERE  tasklistcategoryid = @DistrictAvailable)
+        BEGIN
+            INSERT INTO #taskusercache
+                        (taskid,
+                         userid,
+                         tasklistcategoryid)
+            SELECT tu.taskid,
+                   tlc.userid,
+                   tlc.tasklistcategoryid
+            FROM   #usertasklistcategory tlc
+                   CROSS JOIN #taskresponsibleuser tu
+            WHERE  tlc.tasklistcategoryid = @DistrictAvailable
+                   AND EXISTS (SELECT 1
+                               FROM   adm.userdistrict ud
+                               WHERE  ud.tenantid = @pTenantID
+                                      AND ud.userid = tlc.userid
+                                      AND ud.deleted IS NULL
+                                      AND EXISTS (SELECT 1
+                                                  FROM   adm.userdistrict ud1
+                                                  WHERE  ud1.tenantid =
+                                                         ud.tenantid
+                                                         AND ud1.districtid =
+                                                             ud.districtid
+                                                         AND ud1.userid =
+                                                             tu.userid
+                                                         AND ud1.deleted IS NULL
+                                                 ))
+            ;
+        END;
+  END 

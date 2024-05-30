@@ -62,8 +62,8 @@ namespace Application.Controllers
             if (!tenantId.HasValue)
                 return BadRequest("ID не может быть пустым");
 
-            await new WorkTaskUserCacheAggregateService(_context)
-                .TaskUserCacheAggregate(tenantId.Value);
+            //await new WorkTaskUserCacheAggregateService(_context)
+            //    .TaskUserCacheAggregate(tenantId.Value);
 
             return View();
         }

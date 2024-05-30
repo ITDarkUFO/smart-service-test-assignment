@@ -1,193 +1,163 @@
-﻿CREATE PROCEDURE [WORK].[TaskUserCacheAggregate] @pTenantID smallint as
-set
-    nocount on
-set
-    xact_abort on
-set
-    ansi_nulls on
-set
-    ansi_warnings on
-set
-    ansi_padding on
-set
-    ansi_null_dflt_on on
-set
-    arithabort on
-set
-    quoted_identifier on
-set
-    concat_null_yields_null on
-set
-    implicit_transactions off
-set
-    cursor_close_on_commit off
-set
-    transaction isolation level read uncommitted 
-    
-    --begin declare 
-    
-    --@IsOwnerOnly bit = 0,
-    --@AssignedTo tinyint = 2,
-    --@DistrictAvailable tinyint = 13,
-    --@UserWorkType tinyint = 16,
-    --@AllTaskAvailable tinyint = 19,
-    --@CreatedBy tinyint = 20,
-    --@Now datetime2(0) = getutcdate() 
-    
-    
-    if(1 = 2) begin create table #Task
-    (
-        ID int,
-        AssetID int,
-        ApprovalWith int,
-        EscalatedTo int,
-        CreatedBy int,
-        RequestedBy int,
-        WorkTypeID smallint,
-        Archived datetime2(0),
-        Deleted datetime2(0)
-    );
+﻿CREATE PROCEDURE [WORK].[Taskusercacheaggregate] @pTenantID SMALLINT
+AS
+    SET nocount ON
+    SET xact_abort ON
+    SET ansi_nulls ON
+    SET ansi_warnings ON
+    SET ansi_padding ON
+    SET ansi_null_dflt_on ON
+    SET arithabort ON
+    SET quoted_identifier ON
+    SET concat_null_yields_null ON
+    SET implicit_transactions OFF
+    SET cursor_close_on_commit OFF
+    SET TRANSACTION isolation level READ uncommitted
 
-create table #User(ID int);
-create table #TaskUserCache
-(
-    TaskID int,
-    UserID int,
-    TaskListCategoryID tinyint
-);
+  BEGIN
+      DECLARE @IsOwnerOnly       BIT = 0,
+              @AssignedTo        TINYINT = 2,
+              @DistrictAvailable TINYINT = 13,
+              @UserWorkType      TINYINT = 16,
+              @AllTaskAvailable  TINYINT = 19,
+              @CreatedBy         TINYINT = 20,
+              @Now               DATETIME2(0) = Getutcdate()
 
-end create table #ListCategory
-(
-    ID tinyint,
-    PermissionExtID smallint
-);
+      --IF( 1 = 2 )
+      --  BEGIN
+      --      CREATE TABLE #task
+      --        (
+                 --id           INT,
+                 --assetid      INT,
+                 --approvalwith INT,
+                 --escalatedto  INT,
+                 --createdby    INT,
+                 --requestedby  INT,
+                 --worktypeid   SMALLINT,
+                 --archived     DATETIME2(0),
+                 --deleted      DATETIME2(0)
+      --        );
 
-create table #Employment
-(
-    UserID int,
-    CompanyID smallint,
-    TaskListCategoryID tinyint
-);
+      --      CREATE TABLE #user
+      --        (
+      --           id INT
+      --        );
 
-create table #TaskResponsibleUser
-(TaskID int, UserID int);
+      --      CREATE TABLE #taskusercache
+      --        (
+      --           taskid             INT,
+      --           userid             INT,
+      --           tasklistcategoryid TINYINT
+      --        );
+      --  END
 
-create table #UserTaskListCategory
-(
-    UserID int,
-    TaskListCategoryID tinyint,
-    primary key clustered (TaskListCategoryID, UserID) WITH (IGNORE_DUP_KEY = ON)
-);
+      --CREATE TABLE #listcategory
+      --  (
+      --     id              TINYINT,
+      --     permissionextid SMALLINT
+      --  );
 
-insert into
-    #ListCategory(ID, PermissionExtID)
-select
-    tlc.ID,
-    tlc.PermissionExtID
-from
-    WORK.TaskListCategory tlc
-where
-    tlc.ID in (
-        @DistrictAvailable,
-        @UserWorkType,
-        @AllTaskAvailable
-    );
+      --CREATE TABLE #employment
+      --  (
+      --     userid             INT,
+      --     companyid          SMALLINT,
+      --     tasklistcategoryid TINYINT
+      --  );
 
-insert into
-    #UserTaskListCategory(UserID, TaskListCategoryID)
-    exec ADM.UserListCategoryGet @pTenantID;
+      --CREATE TABLE #taskresponsibleuser
+      --  (
+      --     taskid INT,
+      --     userid INT
+      --  );
 
-if exists (
-    select
-        1
-    from
-        #UserTaskListCategory where TaskListCategoryID = @AllTaskAvailable
-) begin
-insert into
-    #TaskUserCache (TaskID, UserID, TaskListCategoryID)
-select
-    t.ID,
-    tlc.UserID,
-    tlc.TaskListCategoryID
-from
-    #UserTaskListCategory tlc
-    cross join #Task t
-where
-    tlc.TaskListCategoryID = @AllTaskAvailable delete u
-from
-    #User u
-where
-    exists (
-        select
-            1
-        from
-            #TaskUserCache tuc
-        where
-            tuc.UserID = u.ID
-            and tuc.TaskListCategoryID = @AllTaskAvailable
-    );
+      --CREATE TABLE #usertasklistcategory
+      --  (
+      --     userid             INT,
+      --     tasklistcategoryid TINYINT,
+      --     PRIMARY KEY CLUSTERED (tasklistcategoryid, userid) WITH (ignore_dup_key =  on)
+      --  );
 
-end if not exists (
-    select
-        1
-    from
-        #User)
-        return;
+      --INSERT INTO #listcategory (id, permissionextid)
+      --SELECT tlc.id,
+      --       tlc.permissionextid
+      --FROM   work.tasklistcategory tlc
+      --WHERE  tlc.id IN ( @DistrictAvailable, @UserWorkType, @AllTaskAvailable );
 
-insert into
-    #TaskUserCache(TaskID, UserID, TaskListCategoryID)
-select
-    t.ID,
-    tm.UserID,
-    @CreatedBy
-from
-    #Task             t
-    join ADM.TenantMember tm on tm.ID = t.CreatedBy
-where
-    tm.TenantID = @pTenantID
-    and exists (
-        select
-            1
-        from
-            #User u
-        where
-            u.ID = tm.UserID
-    );
 
-/* Пользователи, привязанные к виду работ, указанному в завяке */
-if exists (
-    select
-        1
-    from
-        #UserTaskListCategory where TaskListCategoryID = @UserWorkType)
-    insert into
-        #TaskUserCache(TaskID, UserID, TaskListCategoryID)
-    select
-        t.ID,
-        tlc.UserID,
-        tlc.TaskListCategoryID
-    from
-        #UserTaskListCategory tlc
-        cross join #Task t
-    where
-        tlc.TaskListCategoryID = @UserWorkType
-        and exists (
-            select
-                1
-            from
-                PA.UserWorkType uwt
-                join WORK.WorkType wt on wt.TenantID = uwt.TenantID
-                and wt.ID = uwt.WorkTypeID
-            where
-                uwt.TenantID = @pTenantID
-                and uwt.UserID = tlc.UserID
-                and uwt.WorkTypeID = t.WorkTypeID
-                and uwt.Deleted is null
-                and wt.Deleted is null
-        );
+      --INSERT INTO #usertasklistcategory (userid, tasklistcategoryid)
+      --EXEC adm.Userlistcategoryget @pTenantID;
 
-exec WORK.TaskUserCacheAggregateResponsibility @pTenantID = @pTenantID;
+      --IF EXISTS (SELECT 1
+      --           FROM   #usertasklistcategory
+      --           WHERE  tasklistcategoryid = @AllTaskAvailable)
+        --BEGIN
+        --    INSERT INTO #taskusercache
+        --                (taskid,
+        --                 userid,
+        --                 tasklistcategoryid)
+        --    SELECT t.id,
+        --           tlc.userid,
+        --           tlc.tasklistcategoryid
+        --    FROM   #usertasklistcategory tlc
+        --           CROSS JOIN #task t
+        --    WHERE  tlc.tasklistcategoryid = @AllTaskAvailable
 
-exec ADM.TaskUserCacheAggregate @pTenantID = @pTenantID;
+        --    DELETE u
+        --    FROM   #user u
+        --    WHERE  EXISTS (SELECT 1
+        --                   FROM   #taskusercache tuc
+        --                   WHERE  tuc.userid = u.id
+        --                          AND tuc.tasklistcategoryid = @AllTaskAvailable
+        --                  );
+        --END
 
-end
+      --IF NOT EXISTS (SELECT 1
+      --               FROM   #user)
+      --  RETURN;
+
+      --INSERT INTO #taskusercache
+      --            (taskid,
+      --             userid,
+      --             tasklistcategoryid)
+      --SELECT t.id,
+      --       tm.userid,
+      --       @CreatedBy
+      --FROM   #task t
+      --       JOIN adm.tenantmember tm
+      --         ON tm.id = t.createdby
+      --WHERE  tm.tenantid = @pTenantID
+      --       AND EXISTS (SELECT 1
+      --                   FROM   #user u
+      --                   WHERE  u.id = tm.userid);
+
+      /* Пользователи, привязанные к виду работ, указанному в завяке */
+      IF EXISTS (SELECT 1
+                 FROM   #usertasklistcategory
+                 WHERE  tasklistcategoryid = @UserWorkType)
+
+        INSERT INTO #taskusercache
+                    (taskid,
+                     userid,
+                     tasklistcategoryid)
+        SELECT t.id,
+               tlc.userid,
+               tlc.tasklistcategoryid
+        --FROM   #usertasklistcategory tlc
+        --       CROSS JOIN #task t
+        WHERE  tlc.tasklistcategoryid = @UserWorkType
+               AND EXISTS (SELECT 1
+                           FROM   pa.userworktype uwt
+                                  JOIN work.worktype wt
+                                    ON wt.tenantid = uwt.tenantid
+                                       AND wt.id = uwt.worktypeid
+                           WHERE  uwt.tenantid = @pTenantID
+                                  AND uwt.userid = tlc.userid
+                                  AND uwt.worktypeid = t.worktypeid
+                                  AND uwt.deleted IS NULL
+                                  AND wt.deleted IS NULL);
+
+      EXEC work.Taskusercacheaggregateresponsibility
+        @pTenantID = @pTenantID;
+
+      EXEC adm.Taskusercacheaggregate
+        @pTenantID = @pTenantID;
+  END 

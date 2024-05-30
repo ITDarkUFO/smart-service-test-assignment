@@ -1,4 +1,5 @@
 ﻿using Application.Models;
+using Application.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Work
@@ -9,15 +10,14 @@ namespace Application.Services.Work
         private readonly byte _assignedTo = 2;
         private readonly byte _districtAvailable = 13;
 
-        //INFO: Неясно откуда поступают Tasks и Users, тк таблица #Task и #User временная
         public async Task<List<TaskResponsibleUserDTO>> TaskUserCacheAggregateResponsibility
-            (short tenantID, List<UserTaskListCategoryDTO> userTaskListCategories)
+            (short tenantID, List<UserTaskListCategoryDTO> userTaskListCategories, List<UserDTO> users, List<TaskDTO> tasks)
         {
-            List<TaskAssignedDTO> taskAssigned = await _context.TaskOnlineAssigneds
+            List<TaskAssignedDTO> taskAssigned = await _context.TasksOnlineAssigned
                 .Where(
                     toa => toa.TenantID == tenantID &&
                     toa.AssignedTo != null &&
-                    _context.Tasks.Where(t => t.ID == toa.TaskID).Any())
+                    tasks.Where(t => t.ID == toa.TaskID).Any())
                 .Select(toa => new TaskAssignedDTO
                 {
                     TaskID = toa.TaskID,
@@ -26,7 +26,7 @@ namespace Application.Services.Work
                 .ToListAsync();
 
             List<TaskUserCacheDTO> taskUserCaches = taskAssigned
-                .Where(ta => _context.Users
+                .Where(ta => users
                     .Where(u => u.ID == ta.AssignedTo)
                     .Any())
                 .Select(ta => new TaskUserCacheDTO
@@ -40,23 +40,23 @@ namespace Application.Services.Work
             if (userTaskListCategories
                 .Any(utlc => utlc.TaskListCategoryID == _districtAvailable))
             {
-                var tasksApproved = await _context.Tasks
+                var tasksApproved = tasks
                     .Where(t => t.ApprovalWith != null)
                     .Select(t => new
                     {
                         TaskID = t.ID,
                         UserID = t.ApprovalWith
                     })
-                    .ToListAsync();
+                    .ToList();
 
-                var tasksEscalated = await _context.Tasks
+                var tasksEscalated = tasks
                     .Where(t => t.EscalatedTo != null)
                     .Select(t => new
                     {
                         TaskID = t.ID,
                         UserID = t.EscalatedTo
                     })
-                    .ToListAsync();
+                    .ToList();
 
                 var collectedTasks = tasksApproved
                     .Union(tasksEscalated)
@@ -66,13 +66,12 @@ namespace Application.Services.Work
                         UserID = ta.AssignedTo
                     }));
 
-
                 List<TaskResponsibleUserDTO> taskResponsibleUsers = collectedTasks
                     .GroupBy(ct => ct.TaskID)
-                    .Select(ctg => new TaskResponsibleUserDTO
+                    .Select(g => new TaskResponsibleUserDTO
                     {
-                        TaskID = ctg.First().TaskID,
-                        UserID = (int)ctg.First().UserID!
+                        TaskID = g.First().TaskID,
+                        UserID = (int)g.First().UserID!
                     }).ToList();
 
                 return taskResponsibleUsers;

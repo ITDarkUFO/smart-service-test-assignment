@@ -1,128 +1,100 @@
-﻿CREATE PROCEDURE [WORK].[TaskUserCacheAggregateResponsibility] @pTenantID smallint as
-set
-    nocount on
-set
-    xact_abort on
-set
-    ansi_nulls on
-set
-    ansi_warnings on
-set
-    ansi_padding on
-set
-    ansi_null_dflt_on on
-set
-    arithabort on
-set
-    quoted_identifier on
-set
-    concat_null_yields_null on
-set
-    implicit_transactions off
-set
-    cursor_close_on_commit off
-set
-    transaction isolation level read uncommitted begin declare @AssignedTo tinyint = 2,
-    @DistrictAvailable tinyint = 13 
-    
-    if(1 = 2) begin 
-    
-    create table #User(ID int);
+﻿CREATE PROCEDURE [WORK].[Taskusercacheaggregateresponsibility] @pTenantID
+SMALLINT
+AS
+    SET nocount ON
+    SET xact_abort ON
+    SET ansi_nulls ON
+    SET ansi_warnings ON
+    SET ansi_padding ON
+    SET ansi_null_dflt_on ON
+    SET arithabort ON
+    SET quoted_identifier ON
+    SET concat_null_yields_null ON
+    SET implicit_transactions OFF
+    SET cursor_close_on_commit OFF
+    SET TRANSACTION isolation level READ uncommitted
 
-     create table #Task
-     (
-         ID int,
-         ApprovalWith int,
-         EscalatedTo int
-     );
+  BEGIN
+      DECLARE @AssignedTo        TINYINT = 2,
+              @DistrictAvailable TINYINT = 13
 
-     create table #UserTaskListCategory
-     (
-         UserID int,
-         TaskListCategoryID tinyint
-     );
+      IF( 1 = 2 )
+        BEGIN
+            CREATE TABLE #user
+              (
+                 id INT
+              );
 
-     create table #TaskUserCache
-     (
-         TaskID int,
-         UserID int,
-         TaskListCategoryID tinyint
-     );
+            CREATE TABLE #task
+              (
+                 id           INT,
+                 approvalwith INT,
+                 escalatedto  INT
+              );
 
-     create table #TaskResponsibleUser
-     (TaskID int, UserID int)
-      end;
+            CREATE TABLE #usertasklistcategory
+              (
+                 userid             INT,
+                 tasklistcategoryid TINYINT
+              );
 
-select
-    toa.TaskID,
-    toa.AssignedTo into #TaskAssigned
-from
-    WORK.TaskOnlineAssigned toa
-where
-    toa.TenantID = @pTenantID
-    and toa.AssignedTo is not null
-    and exists (
-        select
-            1
-        from
-            #Task t where t.ID = toa.TaskID
-    );
+            CREATE TABLE #taskusercache
+              (
+                 taskid             INT,
+                 userid             INT,
+                 tasklistcategoryid TINYINT
+              );
 
-insert into
-    #TaskUserCache (TaskID, UserID, TaskListCategoryID)
-select
-    ta.TaskID,
-    UserID = ta.AssignedTo,
-    TaskListCategoryID = @AssignedTo
-from
-    #TaskAssigned ta
-where
-    (
-        exists (
-            select
-                1
-            from
-                #User u
-            where
-                u.ID = ta.AssignedTo
-        )
-    );
+            CREATE TABLE #taskresponsibleuser
+              (
+                 taskid INT,
+                 userid INT
+              )
+        END;
 
-if exists (
-    select
-        1
-    from
-        #UserTaskListCategory where TaskListCategoryID in (@DistrictAvailable))
-begin
-insert into
-    #TaskResponsibleUser(TaskID, UserID)
-select
-    distinct tu.TaskID,
-    tu.UserID
-from
-    (
-        select
-            TaskID = t.ID,
-            UserID = t.ApprovalWith
-        from
-            #Task t
-        where
-            t.ApprovalWith is not null
-        union
-        select
-            TaskID = t.ID,
-            UserID = t.EscalatedTo
-        from
-            #Task t
-        where
-            t.EscalatedTo is not null
-        union
-        select
-            TaskID = ta.TaskID,
-            UserID = ta.AssignedTo
-        from
-            #TaskAssigned ta
-    ) tu;
-    end;
+      SELECT toa.taskid,
+             toa.assignedto
+      INTO   #taskassigned
+      FROM   work.taskonlineassigned toa
+      WHERE  toa.tenantid = @pTenantID
+             AND toa.assignedto IS NOT NULL
+             AND EXISTS (SELECT 1
+                         FROM   #task t
+                         WHERE  t.id = toa.taskid);
 
-end
+      INSERT INTO #taskusercache
+                  (taskid,
+                   userid,
+                   tasklistcategoryid)
+      SELECT ta.taskid,
+             UserID = ta.assignedto,
+             TaskListCategoryID = @AssignedTo
+      FROM   #taskassigned ta
+      WHERE  ( EXISTS (SELECT 1
+                       FROM   #user u
+                       WHERE  u.id = ta.assignedto) );
+
+      IF EXISTS (SELECT 1
+                 FROM   #usertasklistcategory
+                 WHERE  tasklistcategoryid IN ( @DistrictAvailable ))
+        BEGIN
+            INSERT INTO #taskresponsibleuser
+                        (taskid,
+                         userid)
+            SELECT DISTINCT tu.taskid,
+                            tu.userid
+            FROM   (SELECT TaskID = t.id,
+                           UserID = t.approvalwith
+                    FROM   #task t
+                    WHERE  t.approvalwith IS NOT NULL
+                    UNION
+                    SELECT TaskID = t.id,
+                           UserID = t.escalatedto
+                    FROM   #task t
+                    WHERE  t.escalatedto IS NOT NULL
+                    UNION
+                    SELECT TaskID = ta.taskid,
+                           UserID = ta.assignedto
+                    FROM   #taskassigned ta) tu;
+        END;
+  END 

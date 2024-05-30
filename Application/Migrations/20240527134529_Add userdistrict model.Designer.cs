@@ -62,7 +62,7 @@ namespace Application.Migrations
                     b.ToTable("rolepermissionext", "adm");
                 });
 
-            modelBuilder.Entity("Application.Models.Task", b =>
+            modelBuilder.Entity("Application.Models.TaskDTO", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -113,7 +113,7 @@ namespace Application.Migrations
                     b.HasKey("TenantID", "TaskID")
                         .HasName("taskonlineassigned_pkey");
 
-                    b.ToTable("TaskOnlineAssigneds");
+                    b.ToTable("TasksOnlineAssigned");
                 });
 
             modelBuilder.Entity("Application.Models.TaskResponsibleUserDTO", b =>
@@ -153,7 +153,7 @@ namespace Application.Migrations
                     b.ToTable("TaskUserCacheDTO");
                 });
 
-            modelBuilder.Entity("Application.Models.User", b =>
+            modelBuilder.Entity("Application.Models.UserDTO", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()

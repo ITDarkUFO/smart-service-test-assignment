@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Application.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Models
 {
@@ -18,17 +19,21 @@ namespace Application.Models
             Database.EnsureCreated();
         }
 
-        public DbSet<Task> Tasks { get; set; }
-
-        public DbSet<TaskOnlineAssigned> TaskOnlineAssigneds { get; set; }
-
-        public DbSet<User> Users { get; set; }
-
         public DbSet<UserRole> UserRoles { get; set; }
 
-        public DbSet<RolePermissionExt> RolePermissionExts { get; set; }
+        public DbSet<RolePermissionExt> RolesPermissionExt { get; set; }
 
         public DbSet<UserDistrict> UserDistricts { get; set; }
+
+        public DbSet<TenantMember> TenantMembers { get; set; }
+
+        public DbSet<TaskOnlineAssigned> TasksOnlineAssigned { get; set; }
+
+        public DbSet<TaskListCategory> TaskListCategories { get; set; }
+
+        public DbSet<WorkType> WorkTypes { get; set; }
+        
+        public DbSet<UserWorkType> UserWorkTypes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -40,15 +45,6 @@ namespace Application.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Task>()
-                .HasKey(e => e.ID).HasName("task_pkey");
-
-            modelBuilder.Entity<TaskOnlineAssigned>()
-                .HasKey(e => new { e.TenantID, e.TaskID }).HasName("taskonlineassigned_pkey");
-
-            modelBuilder.Entity<User>()
-                .HasKey(e => e.ID).HasName("user_pkey");
-
             modelBuilder.Entity<UserRole>().ToTable("userrole", "adm")
                 .HasKey(e => new { e.TenantID, e.UserID }).HasName("userrole_pkey");
 
@@ -57,6 +53,21 @@ namespace Application.Models
 
             modelBuilder.Entity<UserDistrict>().ToTable("userdistrict", "adm")
                 .HasKey(e => new { e.DistrictID, e.UserID }).HasName("userdistrict_pkey");
+
+            modelBuilder.Entity<TenantMember>().ToTable("tenantmember", "adm")
+                .HasKey(e => e.ID).HasName("tenantmember_pkey");
+
+            modelBuilder.Entity<TaskOnlineAssigned>().ToTable("taskonlineassigned", "work")
+                .HasKey(e => new { e.TenantID, e.TaskID }).HasName("taskonlineassigned_pkey");
+
+            modelBuilder.Entity<TaskListCategory>().ToTable("tasklistcategory", "work")
+                .HasKey(e => e.ID).HasName("tasklistcategory_pkey");
+
+            modelBuilder.Entity<WorkType>().ToTable("worktype", "work")
+                .HasKey(e => e.ID).HasName("worktype_pkey");
+
+            modelBuilder.Entity<UserWorkType>().ToTable("userworktype", "pa")
+                .HasKey(e => e.WorkTypeID).HasName("userworktype_pkey");
         }
     }
 }

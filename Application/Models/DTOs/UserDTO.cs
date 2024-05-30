@@ -2,9 +2,9 @@
 using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Application.Models
+namespace Application.Models.DTOs
 {
-    public class User
+    public class UserDTO
     {
         public int ID { get; set; }
     }

@@ -18,7 +18,7 @@ namespace Application.Migrations
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_TaskOnlineAssigneds",
-                table: "TaskOnlineAssigneds");
+                table: "TasksOnlineAssigned");
 
             migrationBuilder.AlterColumn<short>(
                 name: "TenantID",
@@ -38,7 +38,7 @@ namespace Application.Migrations
 
             migrationBuilder.AddPrimaryKey(
                 name: "taskonlineassigned_pkey",
-                table: "TaskOnlineAssigneds",
+                table: "TasksOnlineAssigned",
                 columns: new[] { "TenantID", "TaskID" });
         }
 
@@ -52,7 +52,7 @@ namespace Application.Migrations
 
             migrationBuilder.DropPrimaryKey(
                 name: "taskonlineassigned_pkey",
-                table: "TaskOnlineAssigneds");
+                table: "TasksOnlineAssigned");
 
             migrationBuilder.AlterColumn<short>(
                 name: "TenantID",
@@ -72,7 +72,7 @@ namespace Application.Migrations
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_TaskOnlineAssigneds",
-                table: "TaskOnlineAssigneds",
+                table: "TasksOnlineAssigned",
                 columns: new[] { "TenantID", "TaskID" });
         }
     }

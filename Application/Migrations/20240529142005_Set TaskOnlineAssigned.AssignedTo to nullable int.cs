@@ -12,7 +12,7 @@ namespace Application.Migrations
         {
             migrationBuilder.AlterColumn<int>(
                 name: "AssignedTo",
-                table: "TaskOnlineAssigneds",
+                table: "TasksOnlineAssigned",
                 type: "integer",
                 nullable: true,
                 oldClrType: typeof(int),
@@ -24,7 +24,7 @@ namespace Application.Migrations
         {
             migrationBuilder.AlterColumn<int>(
                 name: "AssignedTo",
-                table: "TaskOnlineAssigneds",
+                table: "TasksOnlineAssigned",
                 type: "integer",
                 nullable: false,
                 defaultValue: 0,

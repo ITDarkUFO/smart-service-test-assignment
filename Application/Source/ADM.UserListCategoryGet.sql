@@ -13,22 +13,21 @@ AS
     SET cursor_close_on_commit OFF
     SET TRANSACTION isolation level READ uncommitted
 
-    BEGIN
-        IF( 1 != 1 )
-            BEGIN
-                CREATE TABLE #user
-                (
-                    id INT NOT NULL
-                        PRIMARY KEY WITH (ignore_dup_key = on)
-                );
+  BEGIN
+      IF( 1 != 1 )
+        BEGIN
+            CREATE TABLE #user
+              (
+                 id INT NOT NULL PRIMARY KEY WITH (ignore_dup_key = on)
+              );
 
-                CREATE TABLE #listcategory
-                (
-                    id TINYINT NOT NULL
-                        PRIMARY KEY (id) WITH (ignore_dup_key = on),
-                    permissionextid SMALLINT
-                );
-            END;
+            CREATE TABLE #listcategory
+              (
+                 id              TINYINT NOT NULL
+                      PRIMARY KEY (id) WITH (ignore_dup_key = on),
+                 permissionextid SMALLINT
+              );
+        END;
 
       SELECT UserID = u.id,
              ListCategoryID = lc.id

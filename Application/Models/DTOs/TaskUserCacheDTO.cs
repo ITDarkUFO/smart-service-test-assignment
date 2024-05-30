@@ -1,4 +1,4 @@
-﻿namespace Application.Services
+﻿namespace Application.Models.DTOs
 {
     public class TaskUserCacheDTO
     {

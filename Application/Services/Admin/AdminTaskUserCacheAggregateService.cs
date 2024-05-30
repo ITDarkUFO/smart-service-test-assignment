@@ -1,4 +1,5 @@
 ﻿using Application.Models;
+using Application.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

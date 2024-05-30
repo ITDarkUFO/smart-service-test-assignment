@@ -25,7 +25,7 @@ namespace Application.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TaskOnlineAssigneds",
+                name: "TasksOnlineAssigned",
                 columns: table => new
                 {
                     TenantID = table.Column<int>(type: "integer", nullable: false),
@@ -111,7 +111,7 @@ namespace Application.Migrations
                 name: "TaskAssigneds");
 
             migrationBuilder.DropTable(
-                name: "TaskOnlineAssigneds");
+                name: "TasksOnlineAssigned");
 
             migrationBuilder.DropTable(
                 name: "TaskResponsibleUsers");
