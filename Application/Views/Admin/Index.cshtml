@@ -5,14 +5,28 @@
 <h1 class="display-5">Admin Panel</h1>
 
 <h2 class="display-6">UserListCategoryGet</h2>
-<form method="get" asp-controller="Admin" asp-action="UserListCategoryGet">
-    <label for="tenantId" class="form-label">tenantId</label> 
+<form method="post" asp-controller="Admin" asp-action="UserListCategoryGet">
+    <label for="tenantId" class="form-label">tenantId</label>
     <input required name="tenantId" />
     <input type="submit" />
 </form>
 <br />
-<h2 class="display-6">TaskUserCacheAggregate</h2>
-<form method="get" asp-controller="Admin" asp-action="TaskUserCacheAggregate" >
+<h2 class="display-6">AdminTaskUserCacheAggregate</h2>
+<form method="post" asp-controller="Admin" asp-action="AdminTaskUserCacheAggregate">
+    <label for="tenantId" class="form-label">tenantId</label>
+    <input required name="tenantId" />
+    <input type="submit" />
+</form>
+<br />
+<h2 class="display-6">TaskUserCacheAggregateResponsibility</h2>
+<form method="post" asp-controller="Admin" asp-action="TaskUserCacheAggregateResponsibility">
+    <label for="tenantId" class="form-label">tenantId</label>
+    <input required name="tenantId" />
+    <input type="submit" />
+</form>
+<br />
+<h2 class="display-6">WorkTaskUserCacheAggregate</h2>
+<form method="post" asp-controller="Admin" asp-action="WorkTaskUserCacheAggregate">
     <label for="tenantId" class="form-label">tenantId</label>
     <input required name="tenantId" />
     <input type="submit" />

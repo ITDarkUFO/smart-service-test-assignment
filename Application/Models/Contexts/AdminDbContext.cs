@@ -1,19 +1,18 @@
-﻿using Application.Models.DTOs;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace Application.Models
+namespace Application.Models.Contexts
 {
-    public class ApplicationDbContext : DbContext
+    public class AdminDbContext : DbContext
     {
         private readonly IConfiguration _configuration;
 
-        public ApplicationDbContext(IConfiguration configuration)
+        public AdminDbContext(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public ApplicationDbContext(
-            DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options)
+        public AdminDbContext
+            (DbContextOptions<AdminDbContext> options, IConfiguration configuration) : base(options)
         {
             _configuration = configuration;
             Database.EnsureCreated();
@@ -26,14 +25,6 @@ namespace Application.Models
         public DbSet<UserDistrict> UserDistricts { get; set; }
 
         public DbSet<TenantMember> TenantMembers { get; set; }
-
-        public DbSet<TaskOnlineAssigned> TasksOnlineAssigned { get; set; }
-
-        public DbSet<TaskListCategory> TaskListCategories { get; set; }
-
-        public DbSet<WorkType> WorkTypes { get; set; }
-        
-        public DbSet<UserWorkType> UserWorkTypes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -56,18 +47,6 @@ namespace Application.Models
 
             modelBuilder.Entity<TenantMember>().ToTable("tenantmember", "adm")
                 .HasKey(e => e.ID).HasName("tenantmember_pkey");
-
-            modelBuilder.Entity<TaskOnlineAssigned>().ToTable("taskonlineassigned", "work")
-                .HasKey(e => new { e.TenantID, e.TaskID }).HasName("taskonlineassigned_pkey");
-
-            modelBuilder.Entity<TaskListCategory>().ToTable("tasklistcategory", "work")
-                .HasKey(e => e.ID).HasName("tasklistcategory_pkey");
-
-            modelBuilder.Entity<WorkType>().ToTable("worktype", "work")
-                .HasKey(e => e.ID).HasName("worktype_pkey");
-
-            modelBuilder.Entity<UserWorkType>().ToTable("userworktype", "pa")
-                .HasKey(e => e.WorkTypeID).HasName("userworktype_pkey");
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Application.Models;
+﻿using Application.Interfaces;
+using Application.Models.Contexts;
+using Application.Models.DTOs;
 using Application.Services;
 using Application.Services.Admin;
 using Application.Services.Work;
@@ -8,9 +10,35 @@ namespace Application.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AdminController(ApplicationDbContext context) : Controller
+    public class AdminController(
+        IUserRolesRepository userRolesRepository,
+        IRolesPermissionExtRepository rolesPermissionExtRepository,
+        IUserDistrictRepository userDistrictRepository,
+        ITasksOnlineAssignedRepository tasksOnlineAssignedRepository,
+        ITenantMemberRepository tenantMemberRepository,
+        ITaskListCategoryRepository taskListCategoryRepository,
+        IWorkTypeRepository workTypeRepository,
+        IUserWorkTypeRepository userWorkTypeRepository
+        ) : Controller
     {
-        private readonly ApplicationDbContext _context = context;
+        private readonly IUserRolesRepository _userRolesRepository
+            = userRolesRepository;
+
+        private readonly IRolesPermissionExtRepository _rolesPermissionExtRepository
+            = rolesPermissionExtRepository;
+
+        private readonly IUserDistrictRepository _userDistrictRepository = userDistrictRepository;
+
+        private readonly ITasksOnlineAssignedRepository _tasksOnlineAssignedRepository 
+            = tasksOnlineAssignedRepository;
+
+        private readonly ITenantMemberRepository _tenantMemberRepository = tenantMemberRepository;
+
+        private readonly ITaskListCategoryRepository _taskListCategoryRepository = taskListCategoryRepository;
+
+        private readonly IWorkTypeRepository _workTypeRepository = workTypeRepository;
+
+        private readonly IUserWorkTypeRepository _userWorkTypeRepository = userWorkTypeRepository;
 
         [HttpGet]
         public IActionResult Index()
@@ -18,56 +46,89 @@ namespace Application.Controllers
             return View();
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        [HttpPost("UserListCategoryGet")]
+        public async Task<IActionResult> UserListCategoryGet
+            ([FromForm] short? tenantId, [FromForm] List<ListCategoryDTO> listCategories, [FromForm] List<UserDTO> users)
+        {
+            if (!tenantId.HasValue)
+                return BadRequest("tenantId не может быть пустым");
 
-        [HttpGet("UserListCategoryGet")]
-        public async Task<IActionResult> UserListCategoryGet([FromQuery] short? tenantId)
+            try
+            {
+                var userCategories = await new UserListCategoryService
+                    (_userRolesRepository, _rolesPermissionExtRepository)
+                    .UserListCategoryGet(tenantId.Value, listCategories, users);
+
+                return Ok(userCategories);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("AdminTaskUserCacheAggregate")]
+        public async Task<IActionResult> AdminTaskUserCacheAggregate
+            ([FromForm] short? tenantId, [FromForm] List<UserTaskListCategoryDTO> userTaskListCategories, [FromForm] List<TaskResponsibleUserDTO> taskResponsibleUsers)
         {
             if (!tenantId.HasValue)
                 return BadRequest("ID не может быть пустым");
 
-            //var userCategories = await new UserListCategoryService(_context)
-            //    .UserListCategoryGet(tenantId.Value);
+            try
+            {
+                var taskUserCaches = await new AdminTaskUserCacheAggregateService(_userDistrictRepository)
+                    .TaskUserCacheAggregate
+                    (tenantId.Value, userTaskListCategories, taskResponsibleUsers);
 
-            return View();
+                return Ok(taskUserCaches);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        [HttpGet("AdminTaskUserCacheAggregate")]
-        public async Task<IActionResult> AdminTaskUserCacheAggregate([FromQuery] short? tenantId)
+        [HttpPost("TaskUserCacheAggregateResponsibility")]
+        public async Task<IActionResult> TaskUserCacheAggregateResponsibility
+            ([FromForm] short? tenantId, [FromForm] List<UserTaskListCategoryDTO> userTaskListCategories,
+            [FromForm] List<UserDTO> users, [FromForm] List<TaskDTO> tasks)
         {
             if (!tenantId.HasValue)
                 return BadRequest("ID не может быть пустым");
 
-            //var resultWithList = await new AdminTaskUserCacheAggregateService(_context)
-            //    .AdminTaskUserCacheAggregate(tenantId.Value);
+            try
+            {
+                var taskResponsibleUsers = await new TaskUserCacheAggregateResponsibilityService(_tasksOnlineAssignedRepository)
+                    .TaskUserCacheAggregateResponsibility
+                    (tenantId.Value, userTaskListCategories, users, tasks);
 
-            return View();
+                return Ok(taskResponsibleUsers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        [HttpGet("TaskUserCacheAggregateResponsibility")]
-        public async Task<IActionResult> TaskUserCacheAggregateResponsibility([FromQuery] short? tenantId)
+        [HttpPost("WorkTaskUserCacheAggregate")]
+        public async Task<IActionResult> WorkTaskUserCacheAggregate
+            ([FromForm] short? tenantId, [FromForm] List<TaskDTO> tasks, [FromForm] List<UserDTO> users, [FromForm] List<TaskUserCacheDTO> taskUserCaches)
         {
             if (!tenantId.HasValue)
                 return BadRequest("ID не может быть пустым");
 
-            //var results = await new TaskUserCacheAggregateResponsibilityService(_context)
-            //    .TaskUserCacheAggregateResponsibility(tenantId.Value);
+            try
+            {
+                var newTaskUserCaches = await new WorkTaskUserCacheAggregateService
+                    (_userRolesRepository, _rolesPermissionExtRepository, _tasksOnlineAssignedRepository, _userDistrictRepository, _tenantMemberRepository, _taskListCategoryRepository, _workTypeRepository, _userWorkTypeRepository)
+                    .TaskUserCacheAggregate(tenantId.Value, tasks, users, taskUserCaches);
 
-            return View();
+                return Ok(newTaskUserCaches);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
-
-        [HttpGet("WorkTaskUserCacheAggregate")]
-        public async Task<IActionResult> WorkTaskUserCacheAggregate([FromQuery] short? tenantId)
-        {
-            if (!tenantId.HasValue)
-                return BadRequest("ID не может быть пустым");
-
-            //await new WorkTaskUserCacheAggregateService(_context)
-            //    .TaskUserCacheAggregate(tenantId.Value);
-
-            return View();
-        }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-
     }
 }

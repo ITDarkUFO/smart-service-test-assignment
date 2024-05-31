@@ -1,14 +1,42 @@
-﻿using Application.Models;
+﻿using Application.Interfaces;
 using Application.Models.DTOs;
 using Application.Services.Admin;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Work
 {
-    public class WorkTaskUserCacheAggregateService(ApplicationDbContext context)
+    public class WorkTaskUserCacheAggregateService(
+        IUserRolesRepository userRolesRepository,
+        IRolesPermissionExtRepository rolesPermissionExtRepository,
+        ITasksOnlineAssignedRepository tasksOnlineAssignedRepository,
+        IUserDistrictRepository userDistrictRepository,
+        ITenantMemberRepository tenantMemberRepository,
+        ITaskListCategoryRepository taskListCategoryRepository,
+        IWorkTypeRepository workTypeRepository,
+        IUserWorkTypeRepository userWorkTypeRepository
+        )
     {
-        private readonly ApplicationDbContext _context = context;
+        private readonly IUserRolesRepository _userRolesRepository
+            = userRolesRepository;
+
+        private readonly IRolesPermissionExtRepository _rolesPermissionExtRepository
+            = rolesPermissionExtRepository;
+
+        private readonly ITasksOnlineAssignedRepository _tasksOnlineAssignedRepository
+            = tasksOnlineAssignedRepository;
+
+        private readonly IUserDistrictRepository _userDistrictRepository
+            = userDistrictRepository;
+
+        private readonly ITenantMemberRepository _tenantMemberRepository
+            = tenantMemberRepository;
+
+        private readonly ITaskListCategoryRepository _taskListCategoryRepository
+            = taskListCategoryRepository;
+
+        private readonly IWorkTypeRepository _workTypeRepository = workTypeRepository;
+
+        private readonly IUserWorkTypeRepository _userWorkTypeRepository = userWorkTypeRepository;
 
         //INFO: _isOwnerOnly не используется 
         //private readonly bool _isOwnerOnly = false;
@@ -21,7 +49,8 @@ namespace Application.Services.Work
         private readonly byte _createdBy = 20;
 
         public async Task<List<TaskUserCacheDTO>> TaskUserCacheAggregate
-            (short tenantID, List<TaskDTO> tasks, List<UserDTO> users, List<TaskUserCacheDTO> taskUserCaches)
+            (short tenantID, List<TaskDTO> tasks, List<UserDTO> users,
+            List<TaskUserCacheDTO> taskUserCaches)
         {
             //INFO: DateTime now = DateTime.UtcNow не используется 
             //DateTime now = DateTime.UtcNow;
@@ -31,18 +60,19 @@ namespace Application.Services.Work
             List<TaskResponsibleUserDTO> taskResponsibleUsers = [];
             List<UserTaskListCategoryDTO> userTaskListCategories = [];
 
-            categories = await _context.TaskListCategories
-                .Where(tlc => tlc.ID == _districtAvailable ||
-                    tlc.ID == _userWorkType ||
-                    tlc.ID == _allTaskAvailable)
+            var taskListCategories = await _taskListCategoryRepository
+                .GetTaskListCategoriesWhereIdInList([_districtAvailable, _userWorkType, _allTaskAvailable]);
+
+            categories = taskListCategories
                 .Select(tlc => new ListCategoryDTO
                 {
                     ID = tlc.ID,
                     Permissionextid = tlc.Permissionextid
                 })
-                .ToListAsync();
+                .ToList();
 
-            userTaskListCategories = await new UserListCategoryService(_context)
+            userTaskListCategories = await new UserListCategoryService
+                (_userRolesRepository, _rolesPermissionExtRepository)
                 .UserListCategoryGet(tenantID, categories, users);
 
             if (userTaskListCategories.Any(tlc => tlc.TaskListCategoryID == _allTaskAvailable))
@@ -75,8 +105,10 @@ namespace Application.Services.Work
             if (users.Count != 0)
                 return [];
 
+            var tenantMembers = await _tenantMemberRepository.GetAllTenantMembers();
+
             var newTaskUserCaches2 = tasks
-                .SelectMany(t => _context.TenantMembers
+                .SelectMany(t => tenantMembers
                     .Where(tm => tm.ID == t.CreatedBy)
                     .Select(tm => new { tm.TenantID, tm.UserID })
                     .Where(g => g.TenantID == tenantID &&
@@ -92,12 +124,14 @@ namespace Application.Services.Work
 
             if (userTaskListCategories.Any(tlc => tlc.TaskListCategoryID == _userWorkType))
             {
+                var userWorkTypes = await _userWorkTypeRepository.GetAllUserWorkTypes();
+                var workTypes = await _workTypeRepository.GetAllWorkTypes();
+
                 var newTaskUserCaches3 = userTaskListCategories
                     .SelectMany(tlc => tasks
                         .Select(t => new { tlc, t })
                         .Where(g1 => g1.tlc.TaskListCategoryID == _userWorkType &&
-                            _context.UserWorkTypes
-                            .SelectMany(uwt => _context.WorkTypes
+                            userWorkTypes.SelectMany(uwt => workTypes
                                 .Where(wt => wt.TenantID == uwt.TenantID && wt.ID == uwt.WorkTypeID)
                                 .Select(wt => new { uwt, wt })
                                 .Where(g2 => g2.uwt.TenantID == tenantID &&
@@ -118,10 +152,10 @@ namespace Application.Services.Work
                 taskUserCaches.AddRange(newTaskUserCaches3);
             }
 
-            taskResponsibleUsers = await new TaskUserCacheAggregateResponsibilityService(_context)
+            taskResponsibleUsers = await new TaskUserCacheAggregateResponsibilityService(_tasksOnlineAssignedRepository)
                 .TaskUserCacheAggregateResponsibility(tenantID, userTaskListCategories, users, tasks);
 
-            taskUserCaches = await new AdminTaskUserCacheAggregateService(_context)
+            taskUserCaches = await new AdminTaskUserCacheAggregateService(_userDistrictRepository)
                 .TaskUserCacheAggregate(tenantID, userTaskListCategories, taskResponsibleUsers);
 
             return taskUserCaches;

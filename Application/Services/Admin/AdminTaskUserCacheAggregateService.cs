@@ -1,15 +1,14 @@
-﻿using Application.Models;
+﻿using Application.Interfaces;
 using Application.Models.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Admin
 {
-    public class AdminTaskUserCacheAggregateService(ApplicationDbContext context)
+    public class AdminTaskUserCacheAggregateService
+        (IUserDistrictRepository userDistrictRepository)
     {
         private readonly byte _districtAvailable = 13;
 
-        private readonly ApplicationDbContext _context = context;
+        private readonly IUserDistrictRepository _userDistrictRepository = userDistrictRepository;
 
         public async Task<List<TaskUserCacheDTO>> TaskUserCacheAggregate
             (short tenantID,
@@ -29,12 +28,10 @@ namespace Application.Services.Admin
                         tlc.TaskListCategoryID
                     })).ToList();
 
-            var userDistrict1 = await _context.UserDistricts
-                .Where(ud => ud.TenantID == tenantID && ud.Deleted == null)
-                .ToListAsync();
+            var userDistrict1 = await _userDistrictRepository.GetUserDistrictsWithTenant(tenantID);
 
-            var userDistrict2 = await _context.UserDistricts
-                .Where(ud => ud.Deleted == null).ToListAsync();
+            var userDistrict2 = await _userDistrictRepository.GetAllUserDistricts();
+
 
             var taskUserCacheRaw = taskCatJoinTaskUser
                 .Where(tctu => tctu.TaskListCategoryID == _districtAvailable &&

@@ -1,29 +1,31 @@
-﻿using Application.Models;
+﻿using Application.Interfaces;
+using Application.Models;
 using Application.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.Work
 {
-    public class TaskUserCacheAggregateResponsibilityService(ApplicationDbContext context)
+    public class TaskUserCacheAggregateResponsibilityService
+        (ITasksOnlineAssignedRepository tasksOnlineAssignedRepository)
     {
-        private readonly ApplicationDbContext _context = context;
         private readonly byte _assignedTo = 2;
         private readonly byte _districtAvailable = 13;
+
+        private readonly ITasksOnlineAssignedRepository _tasksOnlineAssignedRepository = tasksOnlineAssignedRepository;
 
         public async Task<List<TaskResponsibleUserDTO>> TaskUserCacheAggregateResponsibility
             (short tenantID, List<UserTaskListCategoryDTO> userTaskListCategories, List<UserDTO> users, List<TaskDTO> tasks)
         {
-            List<TaskAssignedDTO> taskAssigned = await _context.TasksOnlineAssigned
-                .Where(
-                    toa => toa.TenantID == tenantID &&
-                    toa.AssignedTo != null &&
-                    tasks.Where(t => t.ID == toa.TaskID).Any())
+            IEnumerable<TaskOnlineAssigned> tasksOnlineAssigned = await _tasksOnlineAssignedRepository.GetOnlineAssignedTasksWithTenant(tenantID);
+
+            List<TaskAssignedDTO> taskAssigned = tasksOnlineAssigned
+                .Where(toa => tasks.Any(t => t.ID == toa.TaskID))
                 .Select(toa => new TaskAssignedDTO
                 {
                     TaskID = toa.TaskID,
                     AssignedTo = toa.AssignedTo
                 })
-                .ToListAsync();
+                .ToList();
 
             List<TaskUserCacheDTO> taskUserCaches = taskAssigned
                 .Where(ta => users
